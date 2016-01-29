@@ -1959,7 +1959,6 @@ public abstract class ODataClientTemplate : TemplateBase
         if (edmCollectionType != null)
         {
             typeReference = edmCollectionType.ElementType;
-            addNullableTemplate = false;
         }
 
         return Utils.GetClrTypeName(typeReference, this.context.UseDataServiceCollection, this, this.context, addNullableTemplate);
@@ -2793,12 +2792,21 @@ internal static class Utils
                         if (primitiveElementType != null)
                         {
                             clrTypeName = Utils.GetClrTypeName(primitiveElementType, clientTemplate);
+                            if (edmTypeReference.IsNullable && !clientTemplate.ClrReferenceTypes.Contains(primitiveElementType.PrimitiveKind) && addNullableTemplate)
+                            {
+                                clrTypeName = string.Format(clientTemplate.SystemNullableStructureTemplate, clrTypeName);
+                            }
                         }
                         else
                         {
                             IEdmSchemaElement schemaElement = (IEdmSchemaElement)elementTypeReference.Definition;
                             clrTypeName = context.GetPrefixedFullName(schemaElement,
                                 context.EnableNamingAlias ? clientTemplate.GetFixedName(Customization.CustomizeNaming(schemaElement.Name)) : clientTemplate.GetFixedName(schemaElement.Name), clientTemplate);
+                            IEdmEnumType enumElementType = elementTypeReference.Definition as IEdmEnumType;
+                            if (enumElementType != null && edmTypeReference.IsNullable && addNullableTemplate)
+                            {
+                                clrTypeName = string.Format(clientTemplate.SystemNullableStructureTemplate, clrTypeName);
+                            }
                         }    
                 
                         string collectionTypeName = isOperationParameter

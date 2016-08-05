@@ -230,6 +230,22 @@ namespace AstoriaUnitTests.TDD.Tests.Client.Materialization
         }
 
         [TestMethod]
+        public void EnumCouldBeConvertedToString()
+        {
+            List<ODataEnumValue> enumValues = new List<ODataEnumValue>()
+            {
+                new ODataEnumValue("Yellow"),
+                new ODataEnumValue("Yellow", "NS.Color")
+            };
+
+            foreach(var value in enumValues)
+            {
+                var clientValue = this.jsonConverter.ConvertPrimitiveValue(value, typeof(string));
+                clientValue.Should().Be("Yellow");
+            }
+        }
+
+        [TestMethod]
         public void JsonConversionForDateTimeShouldThrow()
         {
             Type dateTimeType = typeof(DateTime);
